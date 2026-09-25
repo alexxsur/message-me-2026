@@ -24,24 +24,19 @@ Quick local setup guide for running the app in development.
 	PGUSER=postgres
 	PGPASSWORD=your_real_password
 
-4. Load variables in the current shell.
-
-	set -a
-	source .env
-	set +a
-
-5. Prepare the database.
+4. Prepare the database. Rails loads `.env` automatically in development and test.
 
 	bin/rails db:prepare
 
-6. Start the app.
+5. Start the app.
 
 	bin/rails s
 
 ## About environment variables
 
 - .env is used for local development values such as PGHOST, PGPORT, PGUSER, and PGPASSWORD.
-- Rails reads those values through environment variables in config/database.yml, so if they are not loaded correctly the app cannot connect to PostgreSQL.
+- dotenv-rails loads `.env` automatically when Rails starts in development or test, so `bin/rails` commands and the server receive those values.
+- A terminal opened before Rails starts will not show those variables automatically. Use direnv or source `.env` only when shell commands themselves need them.
 - direnv is optional. It helps load those variables automatically when you enter the project directory. It is most common in Linux/macOS shells, although it can also be used in Windows through WSL or other compatible setups.
 - dotenv is another common option for local development. It loads values from a .env file when the application starts, which can be useful if you prefer that approach. It can be used on Linux and Windows as long as the app or runtime is configured to load the .env file.
 - On Windows, you can also set the same variables manually in PowerShell. This is a simple alternative when you do not want to use direnv or dotenv.

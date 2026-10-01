@@ -10,6 +10,8 @@ The project README lists Ruby 3.3.10 and PostgreSQL as local requirements.
 
 This application uses PostgreSQL. The `pg` gem is the Ruby adapter; it does not install the PostgreSQL server.
 
+The project also uses `cssbundling-rails` with Bootstrap. Node.js and Yarn are required to install JavaScript packages and build the CSS. The repository uses `yarn.lock` and Yarn commands in its package scripts.
+
 On Debian or Ubuntu, PostgreSQL and its development headers can be installed with:
 
 ```bash
@@ -43,6 +45,12 @@ bundle install
 
 Bundler installs the gems declared in the `Gemfile`, using `Gemfile.lock` to keep dependency versions consistent.
 
+Install the JavaScript and CSS build dependencies from `package.json` using the existing Yarn lockfile:
+
+```bash
+yarn install --frozen-lockfile
+```
+
 ### 3. Check that PostgreSQL accepts connections
 
 ```bash
@@ -65,13 +73,21 @@ This creates or prepares the database required by the application.
 bin/rails runner 'puts ActiveRecord::Base.connection.select_value("SELECT 1")'
 ```
 
-### 6. Start the development server
+### 6. Build the CSS
+
+```bash
+yarn build:css
+```
+
+This compiles `application.bootstrap.scss` into the CSS asset served by Rails. Run this command again after changing the SCSS source files.
+
+### 7. Start the Rails server
 
 ```bash
 bin/rails s
 ```
 
-This starts Rails for local browser testing.
+This starts the Rails server. Open `http://localhost:3000` to test the application locally.
 
 ## Possible Original Development Steps
 
@@ -101,6 +117,17 @@ bin/rails generate controller Sessions new
 
 The login form, credential validation, and session handling still need to be implemented.
 
+### Add Bootstrap CSS support
+
+The following commands are a plausible way the current CSS integration was added:
+
+```bash
+bundle add cssbundling-rails
+bin/rails css:install:bootstrap
+```
+
+The installer configures the Sass entry point and package scripts. The current project declares Bootstrap `5.3.8`, Bootstrap Icons `1.13.1`, and Popper `2.11.8` in `package.json`; `yarn.lock` records the resolved package versions.
+
 The routes currently present in `config/routes.rb` are:
 
 ```ruby
@@ -119,6 +146,7 @@ Message Me is a Rails application configured to use PostgreSQL.
 - No user or message models or domain migrations were found.
 - No feature tests were found.
 - Turbo, Stimulus, and Solid Cable are dependencies, but real-time messaging has not been implemented.
+- Bootstrap CSS is configured through `cssbundling-rails`; its Sass entry point imports Bootstrap and Bootstrap Icons.
 
 
 ## Dependency Maintenance

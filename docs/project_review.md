@@ -163,6 +163,18 @@ Check which gems have newer versions available:
 bundle outdated
 ```
 
+Update all gems to the newest versions allowed by the `Gemfile`:
+
+```bash
+bundle update
+```
+
+This may update many entries in `Gemfile.lock`. Review the changes and run the test suite afterward:
+
+```bash
+bin/rails test
+```
+
 Update one gem and its compatible dependencies:
 
 ```bash

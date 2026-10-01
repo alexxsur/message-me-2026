@@ -11,7 +11,7 @@ Quick local setup guide for running the app in development.
 
 1. Go to the project directory.
 
-	cd /.../message-me
+	cd /opt/lampp/htdocs/message-me-2026
 
 2. Create your local environment file.
 
@@ -34,7 +34,8 @@ Quick local setup guide for running the app in development.
 
 ## About environment variables
 
-- .env is used for local development values such as PGHOST, PGPORT, PGUSER, and PGPASSWORD.
+- .env is used for local development values such as PGHOST, PGPORT, PGUSER, and PGPASSWORD. This project uses PostgreSQL on port 5433.
+- PGPORT from .env takes priority over the default port configured in config/database.yml.
 - dotenv-rails loads `.env` automatically when Rails starts in development or test, so `bin/rails` commands and the server receive those values.
 - A terminal opened before Rails starts will not show those variables automatically. Use direnv or source `.env` only when shell commands themselves need them.
 - direnv is optional. It helps load those variables automatically when you enter the project directory. It is most common in Linux/macOS shells, although it can also be used in Windows through WSL or other compatible setups.
@@ -88,8 +89,11 @@ Use these commands to quickly diagnose DB connection issues.
 
 2. Check readiness on common ports.
 
-	pg_isready -h 127.0.0.1 -p 5432
-	pg_isready -h 127.0.0.1 -p 5433
+	# Port used by this project
+	pg_isready -h localhost -p 5433
+
+	# Check another local PostgreSQL instance, if needed
+	pg_isready -h localhost -p 5432
 
 3. Verify values loaded from .env without showing password.
 

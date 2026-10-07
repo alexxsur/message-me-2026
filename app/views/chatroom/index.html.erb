@@ -1,1 +1,63 @@
-Chat room controller view
+<div class="px-4 py-2 my-2 text-center">
+  <div class="d-flex align-items-center justify-content-center mx-auto mb-2 border border-4 border-secondary rounded-circle"
+        style="width: 88px; height: 88px;">
+    <%= image_tag "android-chrome-192x192.png",
+                  alt: "",
+                  width: 60,
+                  height: 60 %>
+  </div>
+  <h1 class="display-6">Say something</h1>
+</div>
+
+<div class="container text-center">
+  <div class="row">
+    <div class="col col-8">
+      <div class="card">
+        <div class="card-body">
+          <div class="p-3">
+            <ul class="list-unstyled d-flex flex-column gap-3 text-start">
+              <li>
+                <a href="#" class="text-decoration-none">Elliot Fu</a> added
+                <a href="#" class="text-decoration-none">Jenny Hess</a> as a friend
+              </li>
+
+              <li>
+                <a href="#" class="text-decoration-none">Stevie Feliciano</a> added
+                <a href="#" class="text-decoration-none">Elliot Fu</a> as a friend
+              </li>
+
+              <li>
+                <a href="#" class="text-decoration-none">Helen Troy</a> added
+                <a href="#" class="text-decoration-none">Christian Rocha</a> as a friend
+              </li>
+
+              <li>
+                <a href="#" class="text-decoration-none">Christian Rocha</a> signed up for the site.
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="card-footer text-body-secondary">
+          <div class="input-group">
+            <input type="text" class="form-control" placeholder="Enter a message..." aria-label="Enter a message..." aria-describedby="button-addon2">
+            <button class="btn chatroom-send-button" type="button" id="button-addon2">
+              <i class="bi bi-pencil-square"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col col-4">
+      <div class="card">
+        <div class="card-body">
+          <div class="list-group" data-bs-theme="dark">
+            <a href="#" class="list-group-item list-group-item-action d-flex">Online Users</a>
+            <a href="#" class="list-group-item list-group-item-action d-flex">Home</a>
+            <a href="#" class="list-group-item list-group-item-action d-flex">Messages</a>
+            <a href="#" class="list-group-item list-group-item-action d-flex">Friends</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

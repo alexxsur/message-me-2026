@@ -43,7 +43,7 @@
           <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
               <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="#">Chatroom</a>
+                <%= link_to "Chatroom", root_path, class: "nav-link" %>
               </li>
               <li class="nav-item">
                 <a class="nav-link active" aria-current="page" href="#">Messages</a>
@@ -55,7 +55,7 @@
               </button>
               <ul class="dropdown-menu">
                 <li><a class="dropdown-item" href="#">Log out</a></li>
-                <li><a class="dropdown-item" href="#">Log in</a></li>
+                <li><%= link_to "Log in", login_path, class: "dropdown-item" %></li>
                 <li><a class="dropdown-item" href="#">Sign up</a></li>
               </ul>
             </div>

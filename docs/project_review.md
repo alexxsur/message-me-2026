@@ -141,8 +141,8 @@ Message Me is a Rails application configured to use PostgreSQL.
 
 - `GET /` routes to `ChatroomController#index`.
 - `GET /login` routes to `SessionsController#new`.
-- The chatroom view contains placeholder text.
-- The login view does not yet contain a functional form.
+- The chatroom view has a static messaging interface with sample activity, a message input, and a sidebar; messaging and online-user data are not dynamic.
+- The login view has a visual username/password form, but authentication is not implemented. Its Sign Up link points to `/signup`, which has no route configured.
 - No user or message models or domain migrations were found.
 - No feature tests were found.
 - Turbo, Stimulus, and Solid Cable are dependencies, but real-time messaging has not been implemented.

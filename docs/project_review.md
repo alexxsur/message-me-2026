@@ -65,7 +65,15 @@ Use the host and port configured for the local PostgreSQL server.
 bin/rails db:prepare
 ```
 
-This creates or prepares the database required by the application.
+This creates or prepares the database required by the application and runs pending migrations.
+
+To load the sample data (5 users with 4 messages each; development-only password `password123`):
+
+```bash
+bin/rails db:seed
+```
+
+The seeds are idempotent: running them again does not duplicate records.
 
 ### 5. Verify the Rails database connection
 
@@ -117,6 +125,30 @@ bin/rails generate controller Sessions new
 
 The login form, credential validation, and session handling still need to be implemented.
 
+### Create the User and Message resources
+
+The `users` and `messages` tables were likely created with migrations such as:
+
+```bash
+bin/rails generate migration CreateUsers username:string password_digest:string
+bin/rails generate migration CreateMessages body:text user:references
+bin/rails db:migrate
+```
+
+The models are written manually in `app/models/`, with `has_secure_password` (bcrypt) on `User` and `belongs_to :user` on `Message`. Do not use `generate model` for a table whose migration already exists; it would create a duplicate migration.
+
+`bin/rails db:rollback` reverts only the last applied migration; use `STEP=n` to revert more.
+
+To create a user from the console, pass `password:` (not `password_digest:`):
+
+```bash
+bin/rails console
+```
+
+```ruby
+User.create(username: "alex", password: "my_password")
+```
+
 ### Add Bootstrap CSS support
 
 The following commands are a plausible way the current CSS integration was added:
@@ -143,8 +175,10 @@ Message Me is a Rails application configured to use PostgreSQL.
 - `GET /login` routes to `SessionsController#new`.
 - The chatroom view has a static messaging interface with sample activity, a message input, and a sidebar; messaging and online-user data are not dynamic.
 - The login view has a visual username/password form, but authentication is not implemented. Its Sign Up link points to `/signup`, which has no route configured.
-- No user or message models or domain migrations were found.
-- No feature tests were found.
+- `User` uses `has_secure_password` (bcrypt), validates `username` (present, unique, 3 to 15 characters), and has many messages.
+- `Message` belongs to a `User` and requires a `body`.
+- `db/seeds.rb` creates 5 users with 4 messages each.
+- Signup, login/logout, and message creation are not implemented in controllers or routes yet.
 - Turbo, Stimulus, and Solid Cable are dependencies, but real-time messaging has not been implemented.
 - Bootstrap CSS is configured through `cssbundling-rails`; its Sass entry point imports Bootstrap and Bootstrap Icons.
 

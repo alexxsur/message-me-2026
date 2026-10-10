@@ -6,6 +6,7 @@ Quick local setup guide for running the app in development.
 
 - Ruby 3.3.10
 - PostgreSQL running locally
+- Node.js and Yarn (to install JavaScript packages and build the CSS)
 
 ## Local setup (step by step)
 
@@ -24,11 +25,24 @@ Quick local setup guide for running the app in development.
 	PGUSER=postgres
 	PGPASSWORD=your_real_password
 
-4. Prepare the database. Rails loads `.env` automatically in development and test.
+4. Install the Ruby and JavaScript dependencies.
+
+	bundle install
+	yarn install --frozen-lockfile
+
+5. Prepare the database. Rails loads `.env` automatically in development and test.
 
 	bin/rails db:prepare
 
-5. Start the app.
+6. (Optional) Load sample data: 5 users with 4 messages each. The seeded users share the development-only password `password123`.
+
+	bin/rails db:seed
+
+7. Build the CSS.
+
+	yarn build:css
+
+8. Start the app.
 
 	bin/rails s
 

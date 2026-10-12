@@ -5,24 +5,14 @@
         <div class="card-body">
           <div class="p-3">
             <ul class="list-unstyled d-flex flex-column gap-3 text-start">
-              <li>
-                <a href="#" class="text-decoration-none">Elliot Fu</a> added
-                <a href="#" class="text-decoration-none">Jenny Hess</a> as a friend
-              </li>
-
-              <li>
-                <a href="#" class="text-decoration-none">Stevie Feliciano</a> added
-                <a href="#" class="text-decoration-none">Elliot Fu</a> as a friend
-              </li>
-
-              <li>
-                <a href="#" class="text-decoration-none">Helen Troy</a> added
-                <a href="#" class="text-decoration-none">Christian Rocha</a> as a friend
-              </li>
-
-              <li>
-                <a href="#" class="text-decoration-none">Christian Rocha</a> signed up for the site.
-              </li>
+              <% @messages.each do |message| %>
+                <li>
+                  <em>
+                    <%= message.user.username %>:
+                  </em>
+                  <%= message.body %>
+                </li>
+              <% end %>
             </ul>
           </div>
         </div>

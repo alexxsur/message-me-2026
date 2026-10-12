@@ -173,14 +173,26 @@ Message Me is a Rails application configured to use PostgreSQL.
 
 - `GET /` routes to `ChatroomController#index`.
 - `GET /login` routes to `SessionsController#new`.
-- The chatroom view has a static messaging interface with sample activity, a message input, and a sidebar; messaging and online-user data are not dynamic.
+- The chatroom controller loads messages from the database, and the view renders each message through a `messages/_message` partial. The message input and send button are still visual only, and online-user data is not dynamic.
 - The login view has a visual username/password form, but authentication is not implemented. Its Sign Up link points to `/signup`, which has no route configured.
 - `User` uses `has_secure_password` (bcrypt), validates `username` (present, unique, 3 to 15 characters), and has many messages.
 - `Message` belongs to a `User` and requires a `body`.
 - `db/seeds.rb` creates 5 users with 4 messages each.
-- Signup, login/logout, and message creation are not implemented in controllers or routes yet.
+- Signup, login/logout, and message creation from the chatroom interface are not implemented in controllers or routes yet.
 - Turbo, Stimulus, and Solid Cable are dependencies, but real-time messaging has not been implemented.
 - Bootstrap CSS is configured through `cssbundling-rails`; its Sass entry point imports Bootstrap and Bootstrap Icons.
+
+### Rendering messages with a partial
+
+The chatroom view uses `<%= render @messages %>` to render the `@messages` collection. Rails infers that each record is a `Message`, looks for `app/views/messages/_message.html.erb`, and renders that partial once per record. Each record is available in the partial as the local variable `message`.
+
+The underscore at the start of `_message.html.erb` identifies it as a partial; when referencing it with an explicit render call, use the path without the underscore:
+
+```erb
+<%= render partial: "messages/message", collection: @messages, as: :message %>
+```
+
+The explicit form above is equivalent to `<%= render @messages %>` here. Keep the partial in the view folder for its resource (`app/views/messages/`) and use the singular resource name for the filename and local variable.
 
 
 ## Dependency Maintenance

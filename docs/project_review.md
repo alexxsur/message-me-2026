@@ -175,6 +175,8 @@ Message Me is a Rails application configured to use PostgreSQL.
 
 - `GET /` routes to `ChatroomController#index`.
 - `GET /login` routes to `SessionsController#new`; `POST /login` to `SessionsController#create`; `DELETE /logout` to `SessionsController#destroy`.
+- `SessionsController` redirects already logged-in users away from `new` and `create` to `/` with an "already logged in" alert.
+- Flash messages are rendered by the `shared/_flash_messages` partial as dismissible Bootstrap alerts.
 - `ChatroomController` uses `before_action :require_login`, so visitors without an active session are redirected to `/login` with an alert.
 - `ApplicationController` defines `current_user`, `logged_in?` and `require_login`; the first two are exposed to views with `helper_method`.
 - The chatroom controller loads messages from the database, and the view renders each message through a `messages/_message` partial. The message input and send button are still visual only, and online-user data is not dynamic.

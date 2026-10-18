@@ -10,12 +10,12 @@
           </div>
         </div>
         <div class="card-footer text-body-secondary">
-          <div class="input-group">
-            <input type="text" class="form-control" placeholder="Enter a message..." aria-label="Enter a message..." aria-describedby="button-addon2">
-            <button class="btn chatroom-send-button" type="button" id="button-addon2">
+          <%= form_with model: Message.new, url: messages_path, class: "input-group" do |f| %>
+            <%= f.text_field :body, class: "form-control", placeholder: "Enter a message...", "aria-label": "Enter a message...", autocomplete: "off", required: true %>
+            <%= f.button type: "submit", class: "btn chatroom-send-button", "aria-label": "Send" do %>
               <i class="bi bi-pencil-square"></i>
-            </button>
-          </div>
+            <% end %>
+          <% end %>
         </div>
       </div>
     </div>

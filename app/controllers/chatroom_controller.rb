@@ -2,6 +2,6 @@ class ChatroomController < ApplicationController
   before_action :require_login
 
   def index
-    @messages = Message.all
+    @messages = Message.includes(:user).order(:created_at)
   end
 end

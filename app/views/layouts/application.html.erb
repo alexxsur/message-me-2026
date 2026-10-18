@@ -54,12 +54,17 @@
                 Account
               </button>
               <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="#">Log out</a></li>
-                <li><%= link_to "Log in", login_path, class: "dropdown-item" %></li>
-                <li><a class="dropdown-item" href="#">Sign up</a></li>
+                <% if logged_in? %>
+                  <li><%= button_to "Log out", logout_path, method: :delete, class: "dropdown-item" %></li>
+                <% else %>
+                  <li><%= link_to "Log in", login_path, class: "dropdown-item" %></li>
+                  <li><a class="dropdown-item" href="#">Sign up</a></li>
+                <% end %>
               </ul>
             </div>
-            <button type="button" class="btn btn-primary">Sign Up</button>
+            <% unless logged_in? %>
+              <button type="button" class="btn btn-primary">Sign Up</button>
+            <% end %>
           </div>
         </div>
       </nav>
@@ -75,6 +80,9 @@
       <h1 class="display-6">Say something</h1>
     </div>
     <div class="container">
+      <% if flash[:notice].present? %>
+        <div class="alert alert-success" role="status"><%= flash[:notice] %></div>
+      <% end %>
       <%= yield %>
     </div>
   </body>

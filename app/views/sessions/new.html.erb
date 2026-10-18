@@ -1,42 +1,36 @@
 <div class="p-4 border rounded bg-body-tertiary">
-  <div class="row align-items-center g-4">
+  <% if flash[:alert].present? %>
+    <div class="alert alert-danger" role="alert"><%= flash[:alert] %></div>
+  <% end %>
+
+  <div class="row">
     <div class="col-md-6">
-      <form>
+      <%= form_with url: login_path, method: :post do |form| %>
         <div class="mb-3">
-          <label for="username" class="form-label">Username</label>
+          <%= form.label :username, "Username", class: "form-label" %>
           <div class="input-group">
             <span class="input-group-text">
               <i class="bi bi-person" aria-hidden="true"></i>
             </span>
-            <input id="username" type="text" class="form-control"
-                   placeholder="Username" autocomplete="username">
+            <%= form.text_field :username, class: "form-control",
+                                placeholder: "Username", autocomplete: "username",
+                                required: true, autofocus: true %>
           </div>
         </div>
 
         <div class="mb-3">
-          <label for="password" class="form-label">Password</label>
+          <%= form.label :password, "Password", class: "form-label" %>
           <div class="input-group">
             <span class="input-group-text">
               <i class="bi bi-lock" aria-hidden="true"></i>
             </span>
-            <input id="password" type="password" class="form-control"
-                   autocomplete="current-password">
+            <%= form.password_field :password, class: "form-control",
+                                    autocomplete: "current-password", required: true %>
           </div>
         </div>
 
-        <button type="submit" class="btn btn-primary sessions-color-button">Login</button>
-      </form>
-    </div>
-
-    <div class="col-12 col-md-auto">
-      <div class="auth-divider">Or</div>
-    </div>
-
-    <div class="col-md text-center">
-      <a href="/signup" class="btn btn-lg btn-outline-primary sessions-color-button">
-        <i class="bi bi-person-plus me-2" aria-hidden="true"></i>
-        Sign Up
-      </a>
+        <%= form.submit "Login", class: "btn btn-primary sessions-color-button" %>
+      <% end %>
     </div>
   </div>
 </div>

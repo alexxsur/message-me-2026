@@ -125,6 +125,14 @@ bin/rails generate controller Sessions new
 
 The login form, credential validation, session handling, and logout were implemented afterwards (see Current Application State).
 
+To undo a controller scaffold created with `generate controller`, use `destroy controller` with the same arguments. For example:
+
+```bash
+bin/rails destroy controller Chatroom index
+```
+
+This removes the generated controller and related files for the `index` action; it does not delete database records. Review the files first, since customized files may also be removed.
+
 ### Create the User and Message resources
 
 The `users` and `messages` tables were likely created with migrations such as:
@@ -148,6 +156,18 @@ bin/rails console
 ```ruby
 User.create(username: "alex", password: "my_password")
 ```
+
+### Inspect records with Hirb
+
+`hirb` is included in the development group and can format Active Record collections as tables in the Rails console. Enable it for the current console session, then query users or messages:
+
+```ruby
+Hirb.enable
+User.limit(5)
+Message.includes(:user).limit(5)
+```
+
+Call `Hirb.disable` to return to the default console output.
 
 ### Add Bootstrap CSS support
 

@@ -123,7 +123,7 @@ The existing chatroom view is still a placeholder.
 bin/rails generate controller Sessions new
 ```
 
-The login form, credential validation, and session handling still need to be implemented.
+The login form, credential validation, session handling, and logout were implemented afterwards (see Current Application State).
 
 ### Create the User and Message resources
 
@@ -165,6 +165,8 @@ The routes currently present in `config/routes.rb` are:
 ```ruby
 root "chatroom#index"
 get "login", to: "sessions#new"
+post "login", to: "sessions#create"
+delete "logout", to: "sessions#destroy"
 ```
 
 ## Current Application State
@@ -172,13 +174,15 @@ get "login", to: "sessions#new"
 Message Me is a Rails application configured to use PostgreSQL.
 
 - `GET /` routes to `ChatroomController#index`.
-- `GET /login` routes to `SessionsController#new`.
+- `GET /login` routes to `SessionsController#new`; `POST /login` to `SessionsController#create`; `DELETE /logout` to `SessionsController#destroy`.
+- `ChatroomController` uses `before_action :require_login`, so visitors without an active session are redirected to `/login` with an alert.
+- `ApplicationController` defines `current_user`, `logged_in?` and `require_login`; the first two are exposed to views with `helper_method`.
 - The chatroom controller loads messages from the database, and the view renders each message through a `messages/_message` partial. The message input and send button are still visual only, and online-user data is not dynamic.
-- The login view has a visual username/password form, but authentication is not implemented. Its Sign Up link points to `/signup`, which has no route configured.
+- Login authenticates with `has_secure_password`, resets the session on login and logout, and shows flash messages. The layout shows Log out only when logged in, and Log in/Sign up only when logged out. The login view's Sign Up link points to `/signup`, which has no route configured.
 - `User` uses `has_secure_password` (bcrypt), validates `username` (present, unique, 3 to 15 characters), and has many messages.
 - `Message` belongs to a `User` and requires a `body`.
 - `db/seeds.rb` creates 5 users with 4 messages each.
-- Signup, login/logout, and message creation from the chatroom interface are not implemented in controllers or routes yet.
+- Signup and message creation from the chatroom interface are not implemented in controllers or routes yet.
 - Turbo, Stimulus, and Solid Cable are dependencies, but real-time messaging has not been implemented.
 - Bootstrap CSS is configured through `cssbundling-rails`; its Sass entry point imports Bootstrap and Bootstrap Icons.
 

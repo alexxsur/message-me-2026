@@ -80,9 +80,7 @@
       <h1 class="display-6">Say something</h1>
     </div>
     <div class="container">
-      <% if flash[:notice].present? %>
-        <div class="alert alert-success" role="status"><%= flash[:notice] %></div>
-      <% end %>
+      <%= render "shared/flash_messages" %>
       <%= yield %>
     </div>
   </body>

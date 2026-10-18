@@ -56,4 +56,12 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     get root_path
     assert_response :success
   end
+
+  test "logged in users are redirected away from login" do
+    post login_path, params: { username: @user.username, password: "password123" }
+    get login_path
+
+    assert_redirected_to root_path
+    assert_equal "You are already logged in.", flash[:alert]
+  end
 end

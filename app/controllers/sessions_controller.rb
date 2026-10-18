@@ -1,4 +1,6 @@
 class SessionsController < ApplicationController
+  before_action :redirect_if_logged_in, only: %i[new create]
+
   def new
   end
 
@@ -18,5 +20,11 @@ class SessionsController < ApplicationController
   def destroy
     reset_session
     redirect_to login_path, notice: "You have logged out."
+  end
+
+  private
+
+  def redirect_if_logged_in
+    redirect_to root_path, alert: "You are already logged in." if logged_in?
   end
 end

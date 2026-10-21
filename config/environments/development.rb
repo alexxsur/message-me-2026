@@ -67,8 +67,22 @@ Rails.application.configure do
   # Annotate rendered view with file names.
   config.action_view.annotate_rendered_view_with_filenames = true
 
-  # Uncomment if you wish to allow Action Cable access from any origin.
+  # Action Cable (WebSocket) origin check. By default only the app's own origin is
+  # accepted, so opening the app from another host/port (LAN IP, separate frontend)
+  # is rejected. There are two ways to relax that; use ONE of them:
+  #
+  # Option 1 - allow EVERY origin (no check at all, least secure):
   # config.action_cable.disable_request_forgery_protection = true
+  #
+  # Option 2 - allow only the origins you list (strings or regexes, recommended):
+  # config.action_cable.allowed_request_origins = [
+  #   "http://localhost:3000",
+  #   "http://192.168.1.50:3000",
+  #   %r{http://localhost:\d+}
+  # ]
+  #
+  # Difference: option 1 turns the check off; option 2 keeps it and only widens
+  # the allowed list. If option 1 is set, option 2 is ignored.
 
   # Raise error when a before_action's only/except options reference missing actions.
   config.action_controller.raise_on_missing_callback_actions = true

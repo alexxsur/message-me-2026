@@ -202,16 +202,23 @@ Message Me is a Rails application configured to use PostgreSQL.
 - The chatroom controller loads messages from the database, and the view renders each message through a `messages/_message` partial. The message form submits to `MessagesController#create`, which saves the message for the logged-in user and redirects back to the chatroom. The online-users sidebar is still static.
 - Login authenticates with `has_secure_password`, resets the session on login and logout, and shows flash messages. The layout shows Log out only when logged in, and Log in/Sign up only when logged out. The login view's Sign Up link points to `/signup`, which has no route configured.
 - `User` uses `has_secure_password` (bcrypt), validates `username` (present, unique, 3 to 15 characters), and has many messages.
-- `Message` belongs to a `User` and requires a `body`.
+- `Message` belongs to a `User`, requires a `body`, and after commit broadcasts the message as JSON (`id`, `body`, `created_at`, `user`) to the `chatroom_channel` stream.
 - `db/seeds.rb` creates 5 users with 4 messages each.
 - Signup is not implemented. Message creation is available to logged-in users through `POST /messages`.
-- Action Cable's JavaScript consumer and a `ChatroomChannel` subscription are present. However, the channel does not yet stream messages, and the client `received` callback is empty, so newly created messages are not broadcast to other connected users.
-- `config/cable.yml` uses the async adapter in development, the test adapter in tests, and Solid Cable in production. The configured adapter alone does not provide real-time chat; the channel still needs a stream and message broadcasts.
+- `ChatroomChannel` streams from `chatroom_channel` and the client subscribes to it. The client `received` callback is still a temporary `alert(data.body)`, so messages are not yet rendered in the chat list.
+- `config/cable.yml` uses the async adapter in development, the test adapter in tests, and Solid Cable in production. The adapter only transports the broadcasts; the UI still has to render them.
 - Bootstrap CSS is configured through `cssbundling-rails`; its Sass entry point imports Bootstrap and Bootstrap Icons.
 
 ### Action Cable implementation status
 
-The repository contains the channel and client subscription scaffolding, but it does not yet implement real-time message delivery. The current message flow is a normal form submission followed by a redirect; other open chatroom pages will not update until refreshed.
+Done: the channel scaffold, the `chatroom_channel` stream, and the JSON broadcast from `Message` (`after_create_commit`).
+
+Pending:
+
+- Render the received message in the chat list (replace the temporary `alert` in `app/javascript/channels/chatroom_channel.js`, add `id="messages"` to the list in the view, and insert items with `textContent` to avoid XSS).
+- `MessagesController#create` still redirects after saving; respond without a redirect so the page is not reloaded.
+- `ApplicationCable::Connection` is empty; identify the connection with `current_user` and reject unauthenticated connections.
+- Update the controller test and add a channel test.
 
 This command was run to generate the Action Cable channel scaffolding:
 
@@ -220,6 +227,35 @@ rails generate channel Chatroom
 ```
 
 The generated `ChatroomChannel` and client subscription files are present. The generator created the scaffold, but real-time message delivery is not implemented yet. Do not rerun the generator because the scaffold already exists.
+
+### Action Cable allowed origins
+
+By default Action Cable only accepts WebSocket connections from the app's own origin. Both options below are commented out in `config/environments/development.rb`; use only one:
+
+- `config.action_cable.disable_request_forgery_protection = true` turns the origin check off and accepts every origin. Least secure; avoid it outside quick local tests.
+- `config.action_cable.allowed_request_origins = ["http://localhost:3000"]` keeps the check and accepts only the listed origins (strings or regexes). Recommended when the app is opened from another host/port or from a separate frontend, and required in production (for example `["https://yourdomain.com"]`).
+
+If the first option is set, the second is ignored.
+
+### Model code ordering convention
+
+Keep model declarations in this order, as in `app/models/message.rb`:
+
+1. Constants, `include` and `enum`
+2. Associations (`belongs_to`, `has_many`)
+3. Validations
+4. Callbacks (for example `after_create_commit :broadcast_message`)
+5. Scopes and class methods
+6. Public instance methods
+7. `private`, including the methods used by callbacks
+
+Order only matters between callbacks of the same type, which run in the order declared; the rest is convention. Keep callback methods such as `broadcast_message` private.
+
+### Design decision: broadcast from the model, not a service object
+
+The message broadcast lives in a `Message` `after_create_commit` callback rather than in the controller or a service object. It runs for every creation path (controller, seeds, console, a future API), only after the transaction commits, and keeps `MessagesController` thin.
+
+A service object is a plain Ruby class in `app/services/` that wraps one business action behind a `call` method (for example `Messages::Create.call(user:, body:)`). It is not used here because creating a message is a single, simple step. Consider extracting one if creation grows to several steps (notifications, email, auditing) or if side effects depend on context, such as not broadcasting during seeds or imports. Moving the broadcast out of the callback at that point is a small refactor. Delegating the broadcast to a job (`MessageBroadcastJob`) is a lighter option if the model should not know the JSON format.
 
 ### Rendering messages with a partial
 

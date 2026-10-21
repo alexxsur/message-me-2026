@@ -2,7 +2,7 @@
 
 ## Purpose and Accuracy
 
-These notes summarize the application's current state and provide a learning-oriented reconstruction of the development process. The repository does not contain a verified command history, so commands described as possible or likely are illustrative, not confirmed records.
+These notes summarize the application's current state and provide a learning-oriented reconstruction of the development process. The repository does not contain a complete command history, so commands described as possible or likely are illustrative unless explicitly confirmed. The project owner confirmed that `rails generate channel Chatroom` was run.
 
 ## Prerequisites
 
@@ -115,7 +115,7 @@ This creates a Rails project configured to use PostgreSQL.
 bin/rails generate controller Chatroom index
 ```
 
-The existing chatroom view is still a placeholder.
+The chatroom now lists saved messages and includes a form for creating new ones. The form submits to `MessagesController#create`; it is not a real-time interface.
 
 ### Generate the login controller and view
 
@@ -199,14 +199,27 @@ Message Me is a Rails application configured to use PostgreSQL.
 - Flash messages are rendered by the `shared/_flash_messages` partial as dismissible Bootstrap alerts.
 - `ChatroomController` uses `before_action :require_login`, so visitors without an active session are redirected to `/login` with an alert.
 - `ApplicationController` defines `current_user`, `logged_in?` and `require_login`; the first two are exposed to views with `helper_method`.
-- The chatroom controller loads messages from the database, and the view renders each message through a `messages/_message` partial. The message input and send button are still visual only, and online-user data is not dynamic.
+- The chatroom controller loads messages from the database, and the view renders each message through a `messages/_message` partial. The message form submits to `MessagesController#create`, which saves the message for the logged-in user and redirects back to the chatroom. The online-users sidebar is still static.
 - Login authenticates with `has_secure_password`, resets the session on login and logout, and shows flash messages. The layout shows Log out only when logged in, and Log in/Sign up only when logged out. The login view's Sign Up link points to `/signup`, which has no route configured.
 - `User` uses `has_secure_password` (bcrypt), validates `username` (present, unique, 3 to 15 characters), and has many messages.
 - `Message` belongs to a `User` and requires a `body`.
 - `db/seeds.rb` creates 5 users with 4 messages each.
-- Signup and message creation from the chatroom interface are not implemented in controllers or routes yet.
-- Turbo, Stimulus, and Solid Cable are dependencies, but real-time messaging has not been implemented.
+- Signup is not implemented. Message creation is available to logged-in users through `POST /messages`.
+- Action Cable's JavaScript consumer and a `ChatroomChannel` subscription are present. However, the channel does not yet stream messages, and the client `received` callback is empty, so newly created messages are not broadcast to other connected users.
+- `config/cable.yml` uses the async adapter in development, the test adapter in tests, and Solid Cable in production. The configured adapter alone does not provide real-time chat; the channel still needs a stream and message broadcasts.
 - Bootstrap CSS is configured through `cssbundling-rails`; its Sass entry point imports Bootstrap and Bootstrap Icons.
+
+### Action Cable implementation status
+
+The repository contains the channel and client subscription scaffolding, but it does not yet implement real-time message delivery. The current message flow is a normal form submission followed by a redirect; other open chatroom pages will not update until refreshed.
+
+This command was run to generate the Action Cable channel scaffolding:
+
+```bash
+rails generate channel Chatroom
+```
+
+The generated `ChatroomChannel` and client subscription files are present. The generator created the scaffold, but real-time message delivery is not implemented yet. Do not rerun the generator because the scaffold already exists.
 
 ### Rendering messages with a partial
 

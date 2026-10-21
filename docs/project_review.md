@@ -215,8 +215,10 @@ Done: the channel scaffold, the `chatroom_channel` stream, the JSON broadcast fr
 
 Pending:
 
-- `ApplicationCable::Connection` is empty; identify the connection with `current_user` and reject unauthenticated connections.
-- Update the controller test and add a channel test.
+- `ApplicationCable::Connection` is empty; authenticate each WebSocket connection from the same server-side login session used by HTTP, identify it with `current_user`, and reject unauthenticated or stale sessions. The chatroom stream is currently shared, so any connected client can receive every broadcast.
+- The channel test file exists but contains only the generated commented example. Add a test that confirms an authenticated subscription streams from `chatroom_channel`; add connection tests for authenticated and unauthenticated sessions.
+- Add message/controller coverage for the broadcast payload (`id`, `body`, `created_at`, and user identity), the successful `204 No Content` response, and the absence of a broadcast when validation or authorization fails. The repository currently has no message controller or model tests.
+- Before deploying, verify that the production Solid Cable database is provisioned and its migrations run, and that the configured one-day message retention is appropriate. Keep the async adapter limited to development; it does not share broadcasts across separate web processes.
 
 This command was run to generate the Action Cable channel scaffolding:
 
@@ -231,7 +233,7 @@ The generated `ChatroomChannel` and client subscription files are present. Do no
 By default Action Cable only accepts WebSocket connections from the app's own origin. Both options below are commented out in `config/environments/development.rb`; use only one:
 
 - `config.action_cable.disable_request_forgery_protection = true` turns the origin check off and accepts every origin. Least secure; avoid it outside quick local tests.
-- `config.action_cable.allowed_request_origins = ["http://localhost:3000"]` keeps the check and accepts only the listed origins (strings or regexes). Recommended when the app is opened from another host/port or from a separate frontend, and required in production (for example `["https://yourdomain.com"]`).
+- `config.action_cable.allowed_request_origins = ["http://localhost:3000"]` keeps the check and accepts only the listed origins (strings or regexes). Configure it when the app is opened from a different host/port or a separate frontend; for production, list the actual trusted frontend origin(s), such as `["https://yourdomain.com"]`. It is not necessary to override the default when the app and WebSocket use the same origin.
 
 If the first option is set, the second is ignored.
 

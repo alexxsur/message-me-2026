@@ -199,10 +199,10 @@ Message Me is a Rails application configured to use PostgreSQL.
 - Flash messages are rendered by the `shared/_flash_messages` partial as dismissible Bootstrap alerts.
 - `ChatroomController` uses `before_action :require_login`, so visitors without an active session are redirected to `/login` with an alert.
 - `ApplicationController` defines `current_user`, `logged_in?` and `require_login`; the first two are exposed to views with `helper_method`.
-- The chatroom controller loads messages from the database, and the view renders each message through a `messages/_message` partial. The message form submits to `MessagesController#create`, which saves the message for the logged-in user and responds with `204 No Content` on success (the page is not reloaded; the broadcast adds the message). On validation errors it redirects back with an alert. The online-users sidebar is still static.
+- The chatroom controller loads the last 20 messages with `Message.includes(:user).recent`, and the view renders each message through a `messages/_message` partial. The message form submits to `MessagesController#create`, which saves the message for the logged-in user and responds with `204 No Content` on success (the page is not reloaded; the broadcast adds the message). On validation errors it redirects back with an alert. The online-users sidebar is still static.
 - Login authenticates with `has_secure_password`, resets the session on login and logout, and shows flash messages. The layout shows Log out only when logged in, and Log in/Sign up only when logged out. The login view's Sign Up link points to `/signup`, which has no route configured.
 - `User` uses `has_secure_password` (bcrypt), validates `username` (present, unique, 3 to 15 characters), and has many messages.
-- `Message` belongs to a `User`, requires a `body`, and after commit broadcasts the message as JSON (`id`, `body`, `created_at`, `user`) to the `chatroom_channel` stream.
+- `Message` belongs to a `User`, requires a `body`, has a `recent` scope (last 20 messages in chronological order), and after commit broadcasts the message as JSON (`id`, `body`, `created_at`, `user`) to the `chatroom_channel` stream.
 - `db/seeds.rb` creates 5 users with 4 messages each.
 - Signup is not implemented. Message creation is available to logged-in users through `POST /messages`.
 - `ChatroomChannel` streams from `chatroom_channel` and the client subscribes to it. The client `received` callback appends each message to the `#messages` list using `textContent`, and a `chat-form` Stimulus controller clears the input after a successful submit.
@@ -254,6 +254,20 @@ Order only matters between callbacks of the same type, which run in the order de
 The message broadcast lives in a `Message` `after_create_commit` callback rather than in the controller or a service object. It runs for every creation path (controller, seeds, console, a future API), only after the transaction commits, and keeps `MessagesController` thin.
 
 A service object is a plain Ruby class in `app/services/` that wraps one business action behind a `call` method (for example `Messages::Create.call(user:, body:)`). It is not used here because creating a message is a single, simple step. Consider extracting one if creation grows to several steps (notifications, email, auditing) or if side effects depend on context, such as not broadcasting during seeds or imports. Moving the broadcast out of the callback at that point is a small refactor. Delegating the broadcast to a job (`MessageBroadcastJob`) is a lighter option if the model should not know the JSON format.
+
+### The `recent` scope
+
+`Message.recent(limit = 20)` is defined as `order(:created_at).last(limit)`. Rails runs a single query (`ORDER BY created_at DESC LIMIT 20`) and returns those messages in chronological order.
+
+`last` executes the query and returns an Array, not an `ActiveRecord::Relation`, so nothing can be chained after `recent`. Put `includes(:user)` and any filters before it:
+
+```ruby
+Message.includes(:user).recent
+```
+
+Only the initial page load is limited. Messages arriving through Action Cable are appended without trimming the list. The chat list has a fixed height (`.chatroom-messages`) with internal scrolling, and `scrollToBottom` in `chatroom_channel.js` keeps the latest message visible.
+
+For a chainable scope, use a subquery instead: `where(id: unscoped.order(created_at: :desc).limit(limit).select(:id)).order(:created_at)`.
 
 ### Rendering messages with a partial
 

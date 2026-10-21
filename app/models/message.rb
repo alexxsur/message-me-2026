@@ -5,6 +5,9 @@ class Message < ApplicationRecord
 
   after_create_commit :broadcast_message
 
+  # Returns an Array (not a Relation), so call it last in the chain.
+  scope :recent, ->(limit = 20) { order(:created_at).last(limit) }
+
   private
 
   def broadcast_message

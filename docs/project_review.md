@@ -115,7 +115,7 @@ This creates a Rails project configured to use PostgreSQL.
 bin/rails generate controller Chatroom index
 ```
 
-The chatroom now lists saved messages and includes a form for creating new ones. The form submits to `MessagesController#create`; it is not a real-time interface.
+The chatroom now lists saved messages and includes a form for creating new ones. The form submits to `MessagesController#create`, and new messages are appended to the list in real time through Action Cable (see Action Cable implementation status).
 
 ### Generate the login controller and view
 
@@ -199,24 +199,22 @@ Message Me is a Rails application configured to use PostgreSQL.
 - Flash messages are rendered by the `shared/_flash_messages` partial as dismissible Bootstrap alerts.
 - `ChatroomController` uses `before_action :require_login`, so visitors without an active session are redirected to `/login` with an alert.
 - `ApplicationController` defines `current_user`, `logged_in?` and `require_login`; the first two are exposed to views with `helper_method`.
-- The chatroom controller loads messages from the database, and the view renders each message through a `messages/_message` partial. The message form submits to `MessagesController#create`, which saves the message for the logged-in user and redirects back to the chatroom. The online-users sidebar is still static.
+- The chatroom controller loads messages from the database, and the view renders each message through a `messages/_message` partial. The message form submits to `MessagesController#create`, which saves the message for the logged-in user and responds with `204 No Content` on success (the page is not reloaded; the broadcast adds the message). On validation errors it redirects back with an alert. The online-users sidebar is still static.
 - Login authenticates with `has_secure_password`, resets the session on login and logout, and shows flash messages. The layout shows Log out only when logged in, and Log in/Sign up only when logged out. The login view's Sign Up link points to `/signup`, which has no route configured.
 - `User` uses `has_secure_password` (bcrypt), validates `username` (present, unique, 3 to 15 characters), and has many messages.
 - `Message` belongs to a `User`, requires a `body`, and after commit broadcasts the message as JSON (`id`, `body`, `created_at`, `user`) to the `chatroom_channel` stream.
 - `db/seeds.rb` creates 5 users with 4 messages each.
 - Signup is not implemented. Message creation is available to logged-in users through `POST /messages`.
-- `ChatroomChannel` streams from `chatroom_channel` and the client subscribes to it. The client `received` callback is still a temporary `alert(data.body)`, so messages are not yet rendered in the chat list.
+- `ChatroomChannel` streams from `chatroom_channel` and the client subscribes to it. The client `received` callback appends each message to the `#messages` list using `textContent`, and a `chat-form` Stimulus controller clears the input after a successful submit.
 - `config/cable.yml` uses the async adapter in development, the test adapter in tests, and Solid Cable in production. The adapter only transports the broadcasts; the UI still has to render them.
 - Bootstrap CSS is configured through `cssbundling-rails`; its Sass entry point imports Bootstrap and Bootstrap Icons.
 
 ### Action Cable implementation status
 
-Done: the channel scaffold, the `chatroom_channel` stream, and the JSON broadcast from `Message` (`after_create_commit`).
+Done: the channel scaffold, the `chatroom_channel` stream, the JSON broadcast from `Message` (`after_create_commit`), rendering of received messages in the list, and no redirect after a successful create.
 
 Pending:
 
-- Render the received message in the chat list (replace the temporary `alert` in `app/javascript/channels/chatroom_channel.js`, add `id="messages"` to the list in the view, and insert items with `textContent` to avoid XSS).
-- `MessagesController#create` still redirects after saving; respond without a redirect so the page is not reloaded.
 - `ApplicationCable::Connection` is empty; identify the connection with `current_user` and reject unauthenticated connections.
 - Update the controller test and add a channel test.
 
@@ -226,7 +224,7 @@ This command was run to generate the Action Cable channel scaffolding:
 rails generate channel Chatroom
 ```
 
-The generated `ChatroomChannel` and client subscription files are present. The generator created the scaffold, but real-time message delivery is not implemented yet. Do not rerun the generator because the scaffold already exists.
+The generated `ChatroomChannel` and client subscription files are present. Do not rerun the generator because the scaffold already exists.
 
 ### Action Cable allowed origins
 

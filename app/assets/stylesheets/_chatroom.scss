@@ -10,3 +10,8 @@
   --bs-btn-active-bg: #45cfaa;
   --bs-btn-active-border-color: #45cfaa;
 }
+
+.chatroom-messages {
+  height: 60vh;
+  overflow-y: auto;
+}

@@ -11,6 +11,13 @@ consumer.subscriptions.create("ChatroomChannel", {
 
   received(data) {
     // Called when there's incoming data on the websocket for this channel
-    alert(data.body)
+    const list = document.getElementById("messages")
+    if (!list) return
+    const li = document.createElement("li")
+    const em = document.createElement("em")
+    em.textContent = `${data.user.username}: `
+    li.append(em, document.createTextNode(data.body))
+    list.appendChild(li)
+    list.lastElementChild.scrollIntoView()
   }
 });

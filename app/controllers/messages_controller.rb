@@ -5,7 +5,7 @@ class MessagesController < ApplicationController
     message = current_user.messages.build(message_params)
 
     if message.save
-      redirect_to root_path
+      head :no_content
     else
       redirect_to root_path, alert: message.errors.full_messages.to_sentence
     end

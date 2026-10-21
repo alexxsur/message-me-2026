@@ -4,13 +4,13 @@
       <div class="card">
         <div class="card-body">
           <div class="p-3">
-            <ul class="list-unstyled d-flex flex-column gap-3 text-start">
+            <ul id="messages" class="list-unstyled d-flex flex-column gap-3 text-start">
               <%= render @messages %>
             </ul>
           </div>
         </div>
         <div class="card-footer text-body-secondary">
-          <%= form_with model: Message.new, url: messages_path, class: "input-group" do |f| %>
+          <%= form_with model: Message.new, url: messages_path, class: "input-group", data: { action: "turbo:submit-end->chat-form#reset", controller: "chat-form" } do |f| %>
             <%= f.text_field :body, class: "form-control", placeholder: "Enter a message...", "aria-label": "Enter a message...", autocomplete: "off", required: true %>
             <%= f.button type: "submit", class: "btn chatroom-send-button", "aria-label": "Send" do %>
               <i class="bi bi-pencil-square"></i>
